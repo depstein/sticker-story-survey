@@ -1,8 +1,11 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { Condition } from '../condition';
+import { UserService } from '../user.service';
 import { CaptionDrawer } from '../drawers/caption-drawer';
 import { BackgroundDrawer } from '../drawers/background-drawer';
 import { StickerDrawer } from '../drawers/sticker-drawer';
+import { OverlayDrawer } from '../drawers/overlay-drawer';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-sticker',
@@ -21,9 +24,14 @@ export class StickerComponent implements OnInit {
   background:BackgroundDrawer;
   sticker:StickerDrawer;
   caption:CaptionDrawer;
+  overlay:OverlayDrawer;
+  snapDelay:number = 1000;
+  snapDuration:number = 5000;
+  animator;
+  progressBar;
 
+  constructor(public userService:UserService) {
 
-  constructor() {
   }
 
   ngOnInit() {
@@ -35,35 +43,55 @@ export class StickerComponent implements OnInit {
     this.sticker.context = this.context;
     this.background.context = this.context;
     this.caption.context = this.context;
-    this.drawEverything();
+    this.overlay.context = this.context;
+    this.drawEverything(0);
+    this.scheduleDraw();
   }
 
   ngOnChanges() {
     this.initializeDrawers();
-    this.drawEverything();
+    this.drawEverything(0);
+    this.scheduleDraw();
   }
 
-  drawEverything() {
+  drawEverything(frame) {
     if(this.context) {
       this.resetCanvas();
-      this.background.drawBackground().then(() => {
+      this.background.drawBackground(frame).then(() => {
         this.resetTransform();
-        this.sticker.drawSticker().then(() => {
+        this.sticker.drawSticker(frame).then(() => {
           this.resetTransform();
-          this.caption.drawCaption();
+          this.caption.drawCaption(frame).then(() => {
+            this.resetTransform();
+            this.overlay.drawOverlay(frame);
+          });
         });
       });
     }
+  }
+
+  scheduleDraw() {
+    if(this.animator) {
+      this.animator.unsubscribe();
+      this.animator = undefined;
+    }
+    let frame=0;
+    this.animator = timer(this.snapDelay, this.snapDuration).subscribe(t => {
+      this.drawEverything(frame%3);
+      frame++;
+    });
   }
 
   initializeDrawers() {
     this.background = new BackgroundDrawer(this.condition, this.canvasWidth, this.canvasHeight, this.ratio);
     this.caption = new CaptionDrawer(this.condition, this.canvasWidth, this.canvasHeight, this.ratio);
     this.sticker = new StickerDrawer(this.condition, this.canvasWidth, this.canvasHeight, this.ratio);
+    this.overlay = new OverlayDrawer(this.canvasWidth, this.canvasWidth, this.ratio, this.userService.person);
     this.canvasBackground = this.background.backgroundStr;
     this.sticker.context = this.context;
     this.background.context = this.context;
     this.caption.context = this.context;
+    this.overlay.context = this.context;
   }
 
   resetTransform() {
@@ -72,6 +100,7 @@ export class StickerComponent implements OnInit {
 
   resetCanvas() {
     this.resetTransform();
-    this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    //Don't need clear because stickers are alwayd displayed in context
+    //this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 }

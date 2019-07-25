@@ -9,8 +9,8 @@ import { Condition } from './condition';
 })
 export class UserService {
   static readonly ROLES:string[] = ['sharer', 'recipient'];
-  static readonly DOMAINS:string[] = ['steps', 'time', 'music', 'food', 'heartrate'];
-  //static readonly DOMAINS:string[] = ['steps'];
+  //static readonly DOMAINS:string[] = ['steps', 'time', 'music', 'food', 'heartrate'];
+  static readonly DOMAINS:string[] = ['steps'];
 	@LocalStorage() uid:string = generate();
 	@LocalStorage() role:string = undefined;
 	@LocalStorage() domain:string = undefined;
@@ -38,12 +38,10 @@ export class UserService {
   selectStickers() {
   	this.stickers = [];
   	var presentations = this.shuffle([{p: 'chartjunk', r: 'no'}, {p: 'chartjunk', r: 'yes'}, {p: 'plain', r: 'no'}, {p: 'plain', r: 'yes'}, {p: 'analogy', r: 'no'}, {p: 'analogy', r: 'yes'}]);
-    //var presentations = this.shuffle([{p: 'plain', r: 'no'}, {p: 'plain', r: 'no'}, {p: 'plain', r: 'no'}, {p: 'plain', r: 'no'}, {p: 'plain', r: 'no'}, {p: 'plain', r: 'no'}]);
-  	var contexts = this.shuffle([{c: 'no', s:0}, {c: 'no', s:1}, {c: 'no', s:2}, {c: 'yes', s:0}, {c: 'yes', s:1}, {c: 'yes', s:2}]);
-  	//TODO: in analysis, remember that scenarios are domain-dependent and styles are domain- and aggregation-dependent.
-    //var scenarios = this.shuffle([2, 2, 2, 2, 2, 2]);
-  	var styles = this.shuffle([this.upTo(3), this.upTo(3), this.upTo(3), this.upTo(3), this.upTo(3), this.upTo(3)]);
-    //var styles = this.shuffle([0, 0, 1, 1, 2, 2]);
+  	//always in context
+    var contexts = this.shuffle([{c: 'yes', s:0}, {c: 'yes', s:1}, {c: 'yes', s:2}, {c: 'yes', s:0}, {c: 'yes', s:1}, {c: 'yes', s:2}]);
+  	//in analysis, remember that scenarios are domain-dependent and styles are domain- and aggregation-dependent.
+    var styles = this.shuffle([this.upTo(6), this.upTo(6), this.upTo(6), this.upTo(6), this.upTo(6), this.upTo(6)]);
   	for(var i=0;i<6;i++) {
   		this.stickers.push(new Condition(presentations[i]['p'], presentations[i]['r'], contexts[i]['c'], contexts[i]['s'], styles[i], this.domain, this.role, i+1));
   	}

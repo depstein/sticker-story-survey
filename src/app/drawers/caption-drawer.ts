@@ -8,11 +8,7 @@ export class CaptionDrawer {
 	ratio:number;
 
 	static readonly ScenarioTextMap = {
-		'heartrate': ['Nervous, about to\ngive my speech...', 'Getting in\na workout! 🏃‍♀️', 'Had to run\nfor the bus 😫'],
-		'steps': ['A nice day\nfor hiking! ⛰️', 'Getting in\na workout! 🏃‍♀️', 'Strolling through\nthe park'],
-		'music': ['I always need\nmusic to study', '🎶 My new\n workout anthem', 'Making the Monday\ncommute bearable'],
-		'time': ['Been studying\nfor a while...', 'Got everything\npacked up! 🚚', 'Way too many\nmeetings today'],
-		'food': ['Food: the #1\nreason to travel', 'Trying a new\nThai place 🍜', '🧁 Cupcakes are so\nyummmmmmmy 🧁']
+		'steps': [['A nice day\nfor hiking! ⛰️', 'So many trees 🌲', 'Heading back down'], ['Getting in\na workout! 🏃‍♀️', 'Still going...', 'Time for\na break 😪'], ['Strolling through\nthe park', 'Nice views\nof the lake', 'Making some\nnew friends 🦆']]
 	}
 
 	constructor(condition:Condition, canvasWidth:number, canvasHeight:number, ratio:number) {
@@ -22,14 +18,15 @@ export class CaptionDrawer {
 		this.ratio = ratio;
 	}
 
-	getText():string[] {
-		return CaptionDrawer.ScenarioTextMap[this.condition.domain][this.condition.scenario].split('\n');
+	getText(frame:number):string[] {
+		return CaptionDrawer.ScenarioTextMap[this.condition.domain][this.condition.scenario][frame].split('\n');
 	}
 
 	//Image onload is async, so use a promise so the background is always drawn first.
-	drawCaption():Promise<void> {
-		//TODO: different with and without context?
-		switch(this.condition.scenario) {
+	drawCaption(frame:number):Promise<void> {
+		switch(frame) {
+			//TODO: switch based on the frame as well...
+			
 			//position slightly differently in each scenario
   			//All captions are delicately positioned relative to their rotation...
 			case 0:
@@ -39,8 +36,8 @@ export class CaptionDrawer {
   				var fontSize = 30;
   				var buffer = 10;
   				this.context.font = "bold " + fontSize + "px Arial";
-  				var maxWidth = Math.max(...this.getText().map((v => {return this.context.measureText(v).width;})));
-				this.getText().forEach((v, i) => {
+  				var maxWidth = Math.max(...this.getText(frame).map((v => {return this.context.measureText(v).width;})));
+				this.getText(frame).forEach((v, i) => {
 					let textWidth = this.context.measureText(v).width;
 					this.context.shadowColor = '#000000';
 					this.context.shadowBlur = 5;
@@ -59,13 +56,13 @@ export class CaptionDrawer {
 				break;
 			case 1:
 				var xPosition = 60;
-  				var yPosition = 20;
+  				var yPosition = 120;
   				var fontSize = 30;
   				var buffer = 10;
   				this.context.rotate(10 * Math.PI / 180);
   				this.context.font = fontSize + "px PT Sans Narrow";
-  				var maxWidth = Math.max(...this.getText().map((v => {return this.context.measureText(v.toUpperCase()).width;})));
-				this.getText().forEach((v, i) => {
+  				var maxWidth = Math.max(...this.getText(frame).map((v => {return this.context.measureText(v.toUpperCase()).width;})));
+				this.getText(frame).forEach((v, i) => {
 					let textWidth = this.context.measureText(v.toUpperCase()).width;
 					this.context.fillStyle = "#f9edf8";
 					this.context.shadowColor = '#f442e5';
@@ -84,8 +81,8 @@ export class CaptionDrawer {
   				var buffer = 20;
   				this.context.rotate(-20 * Math.PI / 180);
   				this.context.font = fontSize + "px Courier New";
-  				var maxWidth = Math.max(...this.getText().map((v => {return this.context.measureText(v).width;})));
-				this.getText().forEach((v, i) => {
+  				var maxWidth = Math.max(...this.getText(frame).map((v => {return this.context.measureText(v).width;})));
+				this.getText(frame).forEach((v, i) => {
 					let textWidth = this.context.measureText(v).width;
 					this.context.fillStyle = "#000000";
 					this.context.fillRect(xPosition - buffer + (maxWidth - textWidth)/2, yPosition + (fontSize + 1 + 1.3*buffer)*i, textWidth + 2*buffer, fontSize + buffer);

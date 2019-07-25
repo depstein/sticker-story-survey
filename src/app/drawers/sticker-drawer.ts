@@ -7,6 +7,9 @@ export class StickerDrawer {
 	canvasWidth:number;
 	canvasHeight:number;
 	ratio:number;
+	static readonly StyleMap = {
+		'steps': [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
+	}
 
 	constructor(condition:Condition, canvasWidth:number, canvasHeight:number, ratio:number) {
 		this.condition = condition;
@@ -15,10 +18,10 @@ export class StickerDrawer {
 		this.ratio = ratio;
 	}
 
-	drawSticker():Promise<void> {
+	drawSticker(frame:number):Promise<void> {
 		return new Promise((resolve, reject) => {
 	      	let image = new Image();
-	      	image.src = this.imageUrl;
+	      	image.src = this.imageUrl(frame);
 		    image.onload = () => {
 		      	let xPosition = 100;
 		      	let yPosition = 100;
@@ -27,7 +30,7 @@ export class StickerDrawer {
 		      		case "yes":
 		      			//smaller sticker, position slightly differently in each scenario
 		      			//All stickers are delicately positioned relative to their rotation...
-		      			switch(this.condition.scenario) {
+		      			switch(frame) {
 		      				case 0:
 		      				xPosition = 90;
 		      				yPosition = 0;
@@ -35,7 +38,7 @@ export class StickerDrawer {
 		      				break;
 		      				case 1:
 		      				xPosition = 40;
-		      				yPosition = 320;
+		      				yPosition = 400;
 		      				this.context.rotate(-10 * Math.PI / 180);
 		      				break;
 		      				case 2:
@@ -67,7 +70,8 @@ export class StickerDrawer {
 	    });
 	}
 
-	private get imageUrl():string {
-	  	return 'assets/' + this.condition.domain + '/' + this.condition.presentation + '_' + this.condition.relevance + '_' + this.condition.style + '.png';
+	private imageUrl(frame:number):string {
+		//TODO: add frame as another _ term
+	  	return 'assets/' + this.condition.domain + '/' + this.condition.presentation + '_' + this.condition.relevance + '_' + StickerDrawer.StyleMap[this.condition.domain][this.condition.style][frame] + '.png';
   	}
 }
