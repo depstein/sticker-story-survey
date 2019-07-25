@@ -17,10 +17,10 @@ export class FirebaseService {
   }
 
   addResponse(response:Response) {
-  	this.responsesCollection.add(response.getData());
+  	//this.responsesCollection.add(response.getData());
   }
 
   addDemographics(demographics:Demographics, uid:string) {
-    this.demographicsCollection.doc(uid).set(demographics.getData());
+    //this.demographicsCollection.doc(uid).set(demographics.getData());
   }
 }
