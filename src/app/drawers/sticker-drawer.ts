@@ -34,7 +34,7 @@ export class StickerDrawer {
 		      				this.context.rotate(30 * Math.PI / 180);
 		      				break;
 		      				case 1:
-		      				xPosition = 40;
+		      				xPosition = 30;
 		      				yPosition = 400;
 		      				this.context.rotate(-10 * Math.PI / 180);
 		      				break;
