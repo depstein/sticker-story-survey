@@ -1,1 +1,1 @@
-ng build --prod --output-path docs --base-href /sticker-survey/
+ng build --prod --output-path docs --base-href /sticker-story-survey/
