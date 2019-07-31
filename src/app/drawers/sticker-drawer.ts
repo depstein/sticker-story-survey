@@ -7,9 +7,6 @@ export class StickerDrawer {
 	canvasWidth:number;
 	canvasHeight:number;
 	ratio:number;
-	static readonly StyleMap = {
-		'steps': [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
-	}
 
 	constructor(condition:Condition, canvasWidth:number, canvasHeight:number, ratio:number) {
 		this.condition = condition;
@@ -71,7 +68,6 @@ export class StickerDrawer {
 	}
 
 	private imageUrl(frame:number):string {
-		//TODO: add frame as another _ term
-	  	return 'assets/' + this.condition.domain + '/' + this.condition.presentation + '_' + this.condition.relevance + '_' + StickerDrawer.StyleMap[this.condition.domain][this.condition.style][frame] + '.png';
+	  	return 'assets/' + this.condition.domain + '/' + this.condition.presentation + '_' + this.condition.relevance + '_' + this.condition.style + '_' + frame + '.png';
   	}
 }

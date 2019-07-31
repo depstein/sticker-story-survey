@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { Condition } from '../condition';
 import { UserService } from '../user.service';
 import { CaptionDrawer } from '../drawers/caption-drawer';
@@ -15,11 +15,11 @@ import { timer } from 'rxjs';
 export class StickerComponent implements OnInit {
   
 	@Input() condition:Condition;
+  @Output() played = new EventEmitter<boolean>();
   @ViewChild('stickerCanvas') canvas:ElementRef;
   ratio = window.devicePixelRatio || 1;
   canvasWidth:number = 277 * this.ratio;
   canvasHeight:number = 600 * this.ratio;
-  canvasBackground:string;
   context:CanvasRenderingContext2D;
   background:BackgroundDrawer;
   sticker:StickerDrawer;
@@ -27,8 +27,10 @@ export class StickerComponent implements OnInit {
   overlay:OverlayDrawer;
   snapDelay:number = 1000;
   snapDuration:number = 5000;
+  refreshRate:number = 5;
   animator;
   progressBar;
+  didPlay:boolean = false;
 
   constructor(public userService:UserService) {
 
@@ -46,28 +48,47 @@ export class StickerComponent implements OnInit {
     this.overlay.context = this.context;
     this.drawEverything(0);
     this.scheduleDraw();
+    this.didPlay = false;
   }
 
   ngOnChanges() {
     this.initializeDrawers();
     this.drawEverything(0);
     this.scheduleDraw();
+    this.didPlay = false;
+    this.played.emit(this.didPlay);
   }
 
-  drawEverything(frame) {
-    if(this.context) {
-      this.resetCanvas();
-      this.background.drawBackground(frame).then(() => {
-        this.resetTransform();
-        this.sticker.drawSticker(frame).then(() => {
+  drawEverything(frame):Promise<void> {
+    return new Promise((resolve, reject) => {
+      if(this.context) {
+        this.resetCanvas();
+        this.background.drawBackground(frame).then(() => {
           this.resetTransform();
-          this.caption.drawCaption(frame).then(() => {
+          this.sticker.drawSticker(frame).then(() => {
             this.resetTransform();
-            this.overlay.drawOverlay(frame);
+            this.caption.drawCaption(frame).then(() => {
+              this.resetTransform();
+              this.overlay.drawLabel(frame).then(() => {
+                resolve();
+              });
+            });
           });
         });
-      });
-    }
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  drawLabel(frame) {
+    this.resetTransform();
+    this.overlay.drawLabel(frame);
+  }
+
+  drawProgressBar(frame, tick) {
+    this.resetTransform();
+    this.overlay.drawProgressBar(frame, tick);
   }
 
   scheduleDraw() {
@@ -76,9 +97,21 @@ export class StickerComponent implements OnInit {
       this.animator = undefined;
     }
     let frame=0;
-    this.animator = timer(this.snapDelay, this.snapDuration).subscribe(t => {
-      this.drawEverything(frame%3);
-      frame++;
+    let prevT=0;
+    this.animator = timer(this.snapDelay, this.refreshRate).subscribe(t => {
+      if((t - prevT)*this.refreshRate >= this.snapDuration) {
+        if(!this.didPlay && frame + 1 == 3) {
+          this.didPlay = true;
+          this.played.emit(this.didPlay);
+        }
+        frame = (frame + 1) % 3;
+        this.drawEverything(frame).then(() => {
+          this.drawProgressBar(frame, t);  
+        });
+        prevT = t;
+      } else {
+        this.drawProgressBar(frame, t);
+      }
     });
   }
 
@@ -86,8 +119,7 @@ export class StickerComponent implements OnInit {
     this.background = new BackgroundDrawer(this.condition, this.canvasWidth, this.canvasHeight, this.ratio);
     this.caption = new CaptionDrawer(this.condition, this.canvasWidth, this.canvasHeight, this.ratio);
     this.sticker = new StickerDrawer(this.condition, this.canvasWidth, this.canvasHeight, this.ratio);
-    this.overlay = new OverlayDrawer(this.canvasWidth, this.canvasWidth, this.ratio, this.userService.person);
-    this.canvasBackground = this.background.backgroundStr;
+    this.overlay = new OverlayDrawer(this.canvasWidth, this.canvasWidth, this.ratio, this.userService.person, this.snapDuration, this.refreshRate);
     this.sticker.context = this.context;
     this.background.context = this.context;
     this.caption.context = this.context;

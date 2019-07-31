@@ -16,6 +16,7 @@ export class SurveyPageComponent implements OnInit {
   @ViewChild('sharerLikerts') sharerLikerts:SharerLikertsComponent;
   @ViewChild('recipientLikerts') recipientLikerts:RecipientLikertsComponent;
   inDevMode:boolean = true;
+  enableResponse:boolean = false;
   
   constructor(private router:Router, public userService:UserService, private firebaseService:FirebaseService) { }
 
@@ -67,6 +68,10 @@ export class SurveyPageComponent implements OnInit {
   resetUser() {
   	this.userService.reset();
     this.resetLikerts();
+  }
+
+  onPlayed(played:boolean) {
+    this.enableResponse = played;
   }
 
 }

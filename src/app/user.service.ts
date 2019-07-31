@@ -41,7 +41,7 @@ export class UserService {
   	//always in context
     var contexts = this.shuffle([{c: 'yes', s:0}, {c: 'yes', s:1}, {c: 'yes', s:2}, {c: 'yes', s:0}, {c: 'yes', s:1}, {c: 'yes', s:2}]);
   	//in analysis, remember that scenarios are domain-dependent and styles are domain- and aggregation-dependent.
-    var styles = this.shuffle([this.upTo(6), this.upTo(6), this.upTo(6), this.upTo(6), this.upTo(6), this.upTo(6)]);
+    var styles = this.shuffle([this.upTo(3), this.upTo(3), this.upTo(3), this.upTo(3), this.upTo(3), this.upTo(3)]);
   	for(var i=0;i<6;i++) {
   		this.stickers.push(new Condition(presentations[i]['p'], presentations[i]['r'], contexts[i]['c'], contexts[i]['s'], styles[i], this.domain, this.role, i+1));
   	}

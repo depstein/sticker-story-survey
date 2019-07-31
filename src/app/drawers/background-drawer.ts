@@ -1,12 +1,6 @@
 import { Condition } from '../condition';
 
 export class BackgroundDrawer {
-	// [presentation][condition][style]
-	  static readonly BackgroundMap = {
-	    'plain': {0:'microbial', 1:'arrows', 2:'weave'},
-	    'chartjunk': {0:'waves', 1:'argyle', 2:'cicada'},
-	    'analogy': {0:'tartan', 1:'madras', 2:'blueprint'}
-	  }
 
 	context:CanvasRenderingContext2D;
 	condition:Condition;
@@ -19,10 +13,6 @@ export class BackgroundDrawer {
 		this.canvasWidth = canvasWidth;
 		this.canvasHeight = canvasHeight;
 		this.ratio = ratio;
-	}
-
-	get backgroundStr():string {
-		return BackgroundDrawer.BackgroundMap[this.condition.presentation][this.condition.scenario];
 	}
 
 	drawBackground(frame:number):Promise<void> {
