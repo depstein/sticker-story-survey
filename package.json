@@ -24,7 +24,7 @@
     "@types/shortid": "0.0.29",
     "core-js": "^2.5.4",
     "firebase": "^6.3.1",
-    "grpc": "^1.22.2",
+    "grpc": "^1.24.9",
     "ngx-store": "^2.1.0",
     "rxjs": "~6.3.3",
     "seedrandom": "^3.0.1",
